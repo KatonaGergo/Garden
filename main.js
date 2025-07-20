@@ -119,11 +119,23 @@ const secondIconTwo = document.querySelector(".second-icon-two");
 
 // Modal stuff
 const modalContent = {
+  Project_1: {
+    title: "🍜Recipe Finder👩🏻‍🍳",
+    content:
+      "Let's get cooking! This project uses TheMealDB API for some recipes and populates my React card components. This shows my skills in working with consistent design systems using components. There is also pagination to switch pages.",
+    link: "https://example.com/",
+  },
   Project_2: {
     title: "FoxyTunes🦊🎶",
     content:
       "FoxyTunes is an easy-to-use, cross-platform, offline (just one out of three, yet 🙂) space to share music, messages, and moods with someone special. Also, to get rid of Spotify's stupid ads and premium benefits. Here, you can download every single song from Spotify and listen to them offline without paying anything. (I dont want you to spend your money 😢)",
     link: "https://foxytunes.onrender.com",
+  },
+  Project_3: {
+    title: "🌞Weather App😎",
+    content:
+      "Rise and shine as they say (but sometimes it's not all that shiny outside). Using a location-based API the user can automatically detect their location and my application will show them the weather near them. I also put some of my design skills to use using Figma.",
+    link: "https://example.com/",
   },
   Chest: {
     title: "💁 About Me",
@@ -133,7 +145,7 @@ const modalContent = {
   Picnic: {
     title: "A Memory Wrapped in Sunlight ☀️",
     content:
-      "Remember how we had a little picnic once in LifeTogether on the sidewalk? Haha, that one carved itself into my memory. That grandpa who wouldnt stop talking until we ran off laughing. 😅 It was a little piece of forever, disguised as just another afternoon. 💛",
+      "Remember how we had a little picnic once in LifeTogether on the sidewalk? Haha, that one carved itself into my memory. That grandpa who wouldnt stop talking until we ran off laughing. Or were you scared? 😅 It was a little piece of forever, disguised as just another afternoon. 💛",
   },
 };
 
