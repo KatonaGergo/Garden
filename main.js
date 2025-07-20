@@ -119,23 +119,11 @@ const secondIconTwo = document.querySelector(".second-icon-two");
 
 // Modal stuff
 const modalContent = {
-  Project_1: {
-    title: "🍜Recipe Finder👩🏻‍🍳",
-    content:
-      "Let's get cooking! This project uses TheMealDB API for some recipes and populates my React card components. This shows my skills in working with consistent design systems using components. There is also pagination to switch pages.",
-    link: "https://example.com/",
-  },
   Project_2: {
     title: "FoxyTunes🦊🎶",
     content:
       "FoxyTunes is an easy-to-use, cross-platform, offline (just one out of three, yet 🙂) space to share music, messages, and moods with someone special. Also, to get rid of Spotify's stupid ads and premium benefits. Here, you can download every single song from Spotify and listen to them offline without paying anything. (I dont want you to spend your money 😢)",
-    link: "https://example.com/",
-  },
-  Project_3: {
-    title: "🌞Weather App😎",
-    content:
-      "Rise and shine as they say (but sometimes it's not all that shiny outside). Using a location-based API the user can automatically detect their location and my application will show them the weather near them. I also put some of my design skills to use using Figma.",
-    link: "https://example.com/",
+    link: "https://foxytunes.onrender.com",
   },
   Chest: {
     title: "💁 About Me",
@@ -143,9 +131,9 @@ const modalContent = {
       "Hiii! You found my chest👋! Since you shared with me one day your personality type, i feel like, its my turn to reveal it. Drum roll... dum dum~ tss🥁🥁 im a mix of two personalities! Well, how can that be? You see... I have always danced between the lines of two worlds, the dreamy soul of an INFP, and the intuitive heart of an INFJ. One lives in feeling deeply and staying true to what matters most... While the other sees the big picture, reads between silences, and longs to understand meaning in everything. Sometimes i follow my heart like a soft rebel... Other times, i get quiet, thoughtful, mapping out emotions like a gentle strategist. So... am i one or the other? Im not exactly sure, i can relate to both. Maybe im just me, stitched from both, and stiched with care, and thats what matters the most ❤️. But if this answer isnt satisfying, i did a test once, and it was INFJ 🙂.",
   },
   Picnic: {
-    title: "🍷 Uggh yesss 🧺",
+    title: "A Memory Wrapped in Sunlight ☀️",
     content:
-      " Picnics are my thanggg don't @ me. Lying down with some good grape juice inna wine glass and a nice book at a park is my total vibe. If this isn't max aura points 💯 idk what is.",
+      "Remember how we had a little picnic once in LifeTogether on the sidewalk? Haha, that one carved itself into my memory. That grandpa who wouldnt stop talking until we ran off laughing. 😅 It was a little piece of forever, disguised as just another afternoon. 💛",
   },
 };
 
