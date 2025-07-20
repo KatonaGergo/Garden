@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: kayshas-garden
+    env: static
+    buildCommand: null
+    staticPublishPath: .
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html 
