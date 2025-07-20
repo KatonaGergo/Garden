@@ -194,6 +194,7 @@ const intersectObjectsNames = [
   "Charmander",
   "Snorlax",
   "Chest",
+  "Gag"
 ];
 
 // Loading screen and loading manager
@@ -402,21 +403,114 @@ function onResize() {
 // See: https://threejs.org/docs/?q=raycas#api/en/core/Raycaster
 let isCharacterReady = true;
 
+// Track Gag's rotation globally
+let gagRotation = 0;
+
+// Function to create a heart texture from heart.png
+function createHeartTexture() {
+  const texture = new THREE.TextureLoader().load('./media/heart.png');
+  texture.encoding = THREE.sRGBEncoding;
+  texture.needsUpdate = true;
+  return texture;
+}
+
+function spawnHeartsAbove(mesh, count = 15) {
+  const heartTexture = createHeartTexture();
+  for (let i = 0; i < count; i++) {
+    const material = new THREE.SpriteMaterial({
+      map: heartTexture,
+      transparent: true,
+      opacity: 1,
+      premultipliedAlpha: true
+    });
+    const sprite = new THREE.Sprite(material);
+    // Position above Gag, randomize a bit
+    sprite.position.copy(mesh.position);
+    sprite.position.y += 10 + Math.random() * 1.5; // Appear higher above Gag
+    sprite.position.x += (Math.random() - 0.5) * 2;
+    sprite.position.z += (Math.random() - 0.5) * 2;
+    sprite.scale.set(2, 2, 2); // Big hearts
+
+    scene.add(sprite);
+
+    // Animate: float up and fade out, then remove
+    gsap.to(sprite.position, {
+      y: sprite.position.y + 2 + Math.random(),
+      duration: 1.2,
+      ease: "power1.out"
+    });
+    gsap.to(sprite.material, {
+      opacity: 0,
+      duration: 1.2,
+      delay: 0.2,
+      onComplete: () => {
+        scene.remove(sprite);
+        sprite.material.dispose();
+        sprite.geometry && sprite.geometry.dispose();
+      }
+    });
+  }
+}
+
 function jumpCharacter(meshID) {
+  console.log("jumpCharacter called with meshID:", meshID);
+  const mesh = scene.getObjectByName(meshID);
+  console.log("Found mesh:", mesh);
   if (!isCharacterReady) return;
 
-  const mesh = scene.getObjectByName(meshID);
   const jumpHeight = 2;
   const jumpDuration = 0.5;
   const isSnorlax = meshID === "Snorlax";
+  const isGag = meshID === "Gag";
 
   const currentScale = {
-    x: mesh.scale.x,
-    y: mesh.scale.y,
-    z: mesh.scale.z,
+    x: mesh ? mesh.scale.x : 1,
+    y: mesh ? mesh.scale.y : 1,
+    z: mesh ? mesh.scale.z : 1,
   };
 
   const t1 = gsap.timeline();
+
+  if (isGag) {
+    console.log("Running custom Gag animation!");
+    spawnHeartsAbove(mesh);
+    // Rotate 90° each jump, always upright
+    gagRotation += Math.PI / 2;
+    if (gagRotation >= Math.PI * 2) gagRotation = 0;
+    t1.to(mesh.scale, {
+      x: currentScale.x * 1.6,
+      y: currentScale.y * 0.6,
+      z: currentScale.z * 1.6,
+      duration: jumpDuration * 0.2,
+      ease: "power2.out",
+    });
+    t1.to(mesh.rotation, {
+      y: gagRotation, // rotate to the next 90°
+      duration: jumpDuration * 0.7,
+      ease: "power2.out",
+    }, "<");
+    t1.to(mesh.position, {
+      y: mesh.position.y + jumpHeight * 2.2, // Higher jump
+      duration: jumpDuration * 0.7,
+      ease: "power2.out",
+    }, "<");
+    t1.to(mesh.scale, {
+      x: currentScale.x,
+      y: currentScale.y,
+      z: currentScale.z,
+      duration: jumpDuration * 0.3,
+      ease: "elastic.out(1, 0.3)",
+      onComplete: () => {
+        isCharacterReady = true;
+      },
+    });
+    t1.to(mesh.position, {
+      y: mesh.position.y,
+      duration: jumpDuration * 0.7,
+      ease: "bounce.out",
+    }, "<");
+    return;
+  }
 
   t1.to(mesh.scale, {
     x: isSnorlax ? currentScale.x * 1.2 : 1.2,
@@ -489,23 +583,43 @@ function handleInteraction() {
   raycaster.setFromCamera(pointer, camera);
   const intersects = raycaster.intersectObjects(intersectObjects);
 
+  const characterNames = [
+    "Bulbasaur",
+    "Chicken",
+    "Pikachu",
+    "Charmander",
+    "Squirtle",
+    "Snorlax",
+    "Gag",
+  ];
+  const modalNames = [
+    "Chest",
+    "Picnic",
+    "Project_1",
+    "Project_2",
+    "Project_3",
+  ];
+
+  let foundName = "";
   if (intersects.length > 0) {
-    intersectObject = intersects[0].object.parent.name;
-  } else {
-    intersectObject = "";
+    const obj = intersects[0].object;
+    if (characterNames.includes(obj.name) || modalNames.includes(obj.name)) {
+      foundName = obj.name;
+    } else if (obj.parent && (characterNames.includes(obj.parent.name) || modalNames.includes(obj.parent.name))) {
+      foundName = obj.parent.name;
+    } else if (obj.parent && obj.parent.parent && (characterNames.includes(obj.parent.parent.name) || modalNames.includes(obj.parent.parent.name))) {
+      foundName = obj.parent.parent.name;
+    } else {
+      foundName = obj.name; // fallback
+    }
+    console.log("Clicked object:", obj.name, "Parent:", obj.parent?.name, "Grandparent:", obj.parent?.parent?.name);
   }
+  intersectObject = foundName;
+
+  console.log("intersectObject:", intersectObject);
 
   if (intersectObject !== "") {
-    if (
-      [
-        "Bulbasaur",
-        "Chicken",
-        "Pikachu",
-        "Charmander",
-        "Squirtle",
-        "Snorlax",
-      ].includes(intersectObject)
-    ) {
+    if (characterNames.includes(intersectObject)) {
       if (isCharacterReady) {
         if (!isMuted) {
           playSound("pokemonSFX");
@@ -513,12 +627,10 @@ function handleInteraction() {
         jumpCharacter(intersectObject);
         isCharacterReady = false;
       }
-    } else {
-      if (intersectObject) {
-        showModal(intersectObject);
-        if (!isMuted) {
-          playSound("projectsSFX");
-        }
+    } else if (modalNames.includes(intersectObject)) {
+      showModal(intersectObject);
+      if (!isMuted) {
+        playSound("projectsSFX");
       }
     }
   }
