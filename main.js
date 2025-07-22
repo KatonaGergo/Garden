@@ -138,7 +138,7 @@ const modalContent = {
     link: "https://example.com/",
   },
   Chest: {
-    title: "💁 About Me",
+    title: "About Me",
     content:
       "Hiii! You found my chest👋! Since you shared with me one day your personality type, i feel like, its my turn to reveal it. Drum roll... dum dum~ tss🥁🥁 im a mix of two personalities! Well, how can that be? You see... I have always danced between the lines of two worlds, the dreamy soul of an INFP, and the intuitive heart of an INFJ. One lives in feeling deeply and staying true to what matters most... While the other sees the big picture, reads between silences, and longs to understand meaning in everything. Sometimes i follow my heart like a soft rebel... Other times, i get quiet, thoughtful, mapping out emotions like a gentle strategist. So... am i one or the other? Im not exactly sure, i can relate to both. Maybe im just me, stitched from both, and stiched with care, and thats what matters the most ❤️. But if this answer isnt satisfying, i did a test once, and it was INFJ 🙂.",
   },
@@ -194,7 +194,8 @@ const intersectObjectsNames = [
   "Charmander",
   "Snorlax",
   "Chest",
-  "Gag"
+  "Gag",
+  "Whimpering_brown"
 ];
 
 // Loading screen and loading manager
@@ -452,6 +453,45 @@ function spawnHeartsAbove(mesh, count = 15) {
   }
 }
 
+function spawnHearts(mesh, count = 15) {
+  const heartTexture = createHeartTexture();
+  for (let i = 0; i < count; i++) {
+    const material = new THREE.SpriteMaterial({
+      map: heartTexture,
+      transparent: true,
+      opacity: 1,
+      premultipliedAlpha: true
+    });
+    const sprite = new THREE.Sprite(material);
+    // Position above Gag, randomize a bit
+    sprite.position.copy(mesh.position);
+    sprite.position.y += 2 + Math.random() * 1.5; // Appear higher above Gag
+    sprite.position.x += (Math.random() - 0.5) * 2 - 2;
+    sprite.position.z += (Math.random() - 0.5) * 2;
+    sprite.scale.set(2, 2, 2); // Big hearts
+
+    scene.add(sprite);
+
+    // Animate: float up and fade out, then remove
+    gsap.to(sprite.position, {
+      y: sprite.position.y + 2 + Math.random(),
+      duration: 1.2,
+      ease: "power1.out"
+    });
+    gsap.to(sprite.material, {
+      opacity: 0,
+      duration: 1.2,
+      delay: 0.2,
+      onComplete: () => {
+        scene.remove(sprite);
+        sprite.material.dispose();
+        sprite.geometry && sprite.geometry.dispose();
+      }
+    });
+  }
+}
+
+const snorlaxDefaultScale = { x: 1, y: 1, z: 1 };
 function jumpCharacter(meshID) {
   console.log("jumpCharacter called with meshID:", meshID);
   const mesh = scene.getObjectByName(meshID);
@@ -462,38 +502,36 @@ function jumpCharacter(meshID) {
   const jumpDuration = 0.5;
   const isSnorlax = meshID === "Snorlax";
   const isGag = meshID === "Gag";
+  const isWhimperingbrown = meshID === "Whimpering_brown";
 
-  const currentScale = {
-    x: mesh ? mesh.scale.x : 1,
-    y: mesh ? mesh.scale.y : 1,
-    z: mesh ? mesh.scale.z : 1,
-  };
+  // Use original scale for Snorlax, current scale otherwise
+  const currentScale = isSnorlax
+    ? snorlaxDefaultScale
+    : {
+        x: mesh ? mesh.scale.x : 1,
+        y: mesh ? mesh.scale.y : 1,
+        z: mesh ? mesh.scale.z : 1,
+      };
 
   const t1 = gsap.timeline();
 
-  if (isGag) {
-    console.log("Running custom Gag animation!");
-    spawnHeartsAbove(mesh);
-    // Rotate 90° each jump, always upright
-    gagRotation += Math.PI / 2;
-    if (gagRotation >= Math.PI * 2) gagRotation = 0;
+  if (isWhimperingbrown) {
+    console.log("Running custom Whimpering_brown animation!");
+    spawnHearts(mesh);
     t1.to(mesh.scale, {
-      x: currentScale.x * 1.6,
-      y: currentScale.y * 0.6,
       z: currentScale.z * 1.6,
       duration: jumpDuration * 0.2,
       ease: "power2.out",
     });
-    t1.to(mesh.rotation, {
-      y: gagRotation, // rotate to the next 90°
-      duration: jumpDuration * 0.7,
-      ease: "power2.out",
-    }, "<");
-    t1.to(mesh.position, {
-      y: mesh.position.y + jumpHeight * 2.2, // Higher jump
-      duration: jumpDuration * 0.7,
-      ease: "power2.out",
-    }, "<");
+    t1.to(
+      mesh.position,
+      {
+        y: mesh.position.y + jumpHeight * 2.2,
+        duration: jumpDuration * 0.7,
+        ease: "power2.out",
+      },
+      "<"
+    );
     t1.to(mesh.scale, {
       x: currentScale.x,
       y: currentScale.y,
@@ -504,26 +542,83 @@ function jumpCharacter(meshID) {
         isCharacterReady = true;
       },
     });
-    t1.to(mesh.position, {
-      y: mesh.position.y,
-      duration: jumpDuration * 0.7,
-      ease: "bounce.out",
-    }, "<");
+    t1.to(
+      mesh.position,
+      {
+        y: mesh.position.y,
+        duration: jumpDuration * 0.7,
+        ease: "bounce.out",
+      },
+      "<"
+    );
     return;
   }
 
+  if (isGag) {
+    console.log("Running custom Gag animation!");
+    spawnHeartsAbove(mesh);
+    gagRotation += Math.PI / 2;
+    if (gagRotation >= Math.PI * 2) gagRotation = 0;
+    t1.to(mesh.scale, {
+      x: currentScale.x * 1.6,
+      y: currentScale.y * 0.6,
+      z: currentScale.z * 1.6,
+      duration: jumpDuration * 0.2,
+      ease: "power2.out",
+    });
+    t1.to(
+      mesh.rotation,
+      {
+        y: gagRotation,
+        duration: jumpDuration * 0.7,
+        ease: "power2.out",
+      },
+      "<"
+    );
+    t1.to(
+      mesh.position,
+      {
+        y: mesh.position.y + jumpHeight * 2.2,
+        duration: jumpDuration * 0.7,
+        ease: "power2.out",
+      },
+      "<"
+    );
+    t1.to(mesh.scale, {
+      x: currentScale.x,
+      y: currentScale.y,
+      z: currentScale.z,
+      duration: jumpDuration * 0.3,
+      ease: "elastic.out(1, 0.3)",
+      onComplete: () => {
+        isCharacterReady = true;
+      },
+    });
+    t1.to(
+      mesh.position,
+      {
+        y: mesh.position.y,
+        duration: jumpDuration * 0.7,
+        ease: "bounce.out",
+      },
+      "<"
+    );
+    return;
+  }
+
+  // Snorlax animation with fixed base scale
   t1.to(mesh.scale, {
-    x: isSnorlax ? currentScale.x * 1.2 : 1.2,
-    y: isSnorlax ? currentScale.y * 0.8 : 0.8,
-    z: isSnorlax ? currentScale.z * 1.2 : 1.2,
+    x: isSnorlax ? snorlaxDefaultScale.x * 1.2 : 1.2,
+    y: isSnorlax ? snorlaxDefaultScale.y * 0.8 : 0.8,
+    z: isSnorlax ? snorlaxDefaultScale.z * 1.2 : 1.2,
     duration: jumpDuration * 0.2,
     ease: "power2.out",
   });
 
   t1.to(mesh.scale, {
-    x: isSnorlax ? currentScale.x * 0.8 : 0.8,
-    y: isSnorlax ? currentScale.y * 1.3 : 1.3,
-    z: isSnorlax ? currentScale.z * 0.8 : 0.8,
+    x: isSnorlax ? snorlaxDefaultScale.x * 0.8 : 0.8,
+    y: isSnorlax ? snorlaxDefaultScale.y * 1.3 : 1.3,
+    z: isSnorlax ? snorlaxDefaultScale.z * 0.8 : 0.8,
     duration: jumpDuration * 0.3,
     ease: "power2.out",
   });
@@ -539,9 +634,9 @@ function jumpCharacter(meshID) {
   );
 
   t1.to(mesh.scale, {
-    x: isSnorlax ? currentScale.x * 1.2 : 1,
-    y: isSnorlax ? currentScale.y * 1.2 : 1,
-    z: isSnorlax ? currentScale.z * 1.2 : 1,
+    x: isSnorlax ? snorlaxDefaultScale.x * 1.2 : 1,
+    y: isSnorlax ? snorlaxDefaultScale.y * 1.2 : 1,
+    z: isSnorlax ? snorlaxDefaultScale.z * 1.2 : 1,
     duration: jumpDuration * 0.3,
     ease: "power1.inOut",
   });
@@ -552,22 +647,21 @@ function jumpCharacter(meshID) {
       y: mesh.position.y,
       duration: jumpDuration * 0.5,
       ease: "bounce.out",
-      onComplete: () => {
-        isCharacterReady = true;
-      },
     },
     ">"
   );
 
-  if (!isSnorlax) {
-    t1.to(mesh.scale, {
-      x: 1,
-      y: 1,
-      z: 1,
-      duration: jumpDuration * 0.2,
-      ease: "elastic.out(1, 0.3)",
-    });
-  }
+  // Reset scale to default at the end for Snorlax and others
+  t1.to(mesh.scale, {
+    x: snorlaxDefaultScale.x,
+    y: snorlaxDefaultScale.y,
+    z: snorlaxDefaultScale.z,
+    duration: jumpDuration * 0.2,
+    ease: "elastic.out(1, 0.3)",
+    onComplete: () => {
+      isCharacterReady = true;
+    },
+  });
 }
 
 function onClick() {
@@ -591,6 +685,7 @@ function handleInteraction() {
     "Squirtle",
     "Snorlax",
     "Gag",
+    "Whimpering_brown"
   ];
   const modalNames = [
     "Chest",
